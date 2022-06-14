@@ -33,7 +33,7 @@ def getNodes():
                 # Node is offline remove from array
                 available_nodes.remove(node)
 
-        if len(available_nodes) <= amount:
+        if len(available_nodes) < amount:
             return "400"
 
         indexs = random.sample(range(len(available_nodes)), amount)
@@ -42,7 +42,7 @@ def getNodes():
         for index in indexs:
             selected_nodes.append(available_nodes[index])
 
-        return selected_nodes
+        return str(selected_nodes)
 
 
 
