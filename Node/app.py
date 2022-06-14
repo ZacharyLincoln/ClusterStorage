@@ -2,6 +2,9 @@ import requests
 from flask import Flask, request
 import json
 
+master_node_ip = "http://10.0.0.9:8080"
+response = requests.get(url=master_node_ip + "/setup")
+
 app = Flask(__name__)
 
 
@@ -56,7 +59,5 @@ def retrieve_file(id):
 
 
 if __name__ == '__main__':
-    master_node_ip = "http://10.0.0.9:8080"
-    response = requests.get(url=master_node_ip + "/setup")
     app.run()
 

@@ -12,7 +12,8 @@ available_nodes = []
 @app.route('/setup', methods=['GET', 'POST'])
 def setupNode():
     if request.method == 'GET':
-        ip = flask.request.remote_addr
+        ip = "http:"+flask.request.remote_addr+"8080"
+
         print(ip)
         available_nodes.append(ip)
         return "Setup Complete"
