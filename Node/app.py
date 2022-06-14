@@ -1,8 +1,13 @@
+import requests
 from flask import Flask, request
-import re
 import json
 
 app = Flask(__name__)
+
+
+@app.route('/online', methods=['GET', 'POST'])
+def online():
+    return "200"
 
 
 @app.route('/upload', methods=['GET', 'POST'])
@@ -51,5 +56,7 @@ def retrieve_file(id):
 
 
 if __name__ == '__main__':
+    master_node_ip = "http://10.0.0.68"
+    response = requests.get(url=master_node_ip + "/setup")
     app.run()
 

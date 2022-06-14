@@ -69,12 +69,18 @@ class File:
     # Returns an uploaded file
     def upload(self, parts):
 
-        hosts = [Host("http://127.0.0.1:5000"), Host("http://127.0.0.1:5000"), Host("http://127.0.0.1:5000")]
+        params = {'amount': self.num_of_parts * (self.redundancy + 1)}
+
+        master_node_ip = "http://10.0.0.68:5000"
+        response = requests.get(url=master_node_ip + "/getnodes", params=params)
+        print(response)
+
+        hosts = [Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]
 
         # An array of arrays of length of parts example
         # [1, 2, 3], [1, 2, 3], [1, 2, 3]
         # Where the length of parts is 3
-        redundant_hosts_arry = [[Host("http://127.0.0.1:5000"), Host("http://127.0.0.1:5000"), Host("http://127.0.0.1:5000")]]
+        redundant_hosts_arry = [[Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]]
         # TODO Get (num_of_parts * redundancy) online hosts
 
         ids = []
@@ -257,14 +263,14 @@ class Host:
         return part
 
 
+
 if __name__ == "__main__":
-    '''
 
     keys = []
-    file = File("../app.py", keys, 3, 2)
+    file = File("../app.py", keys, 4, 0)
     bytes = file._convert_to_binary()
     print("Old", bytes)
-    parts = file._spit_into_parts(bytes, 3)
+    parts = file._spit_into_parts(bytes, 4)
     encrypted_parts = file._encrypt_parts(parts,keys)
     
     uploaded_file = file.upload(encrypted_parts)
@@ -287,6 +293,8 @@ if __name__ == "__main__":
     #host.upload_part(parts[0])
     #part = host.download_part(parts[0].id)
     #print(part.id)
+
+'''
 
 
 
