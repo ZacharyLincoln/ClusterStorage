@@ -32,8 +32,8 @@ def getNodes():
                 # Node is offline remove from array
                 available_nodes.remove(node)
 
-        if len(available_nodes) < amount:
-            return 400
+        if len(available_nodes) <= amount:
+            return "400"
 
         indexs = random.sample(range(len(available_nodes)), amount)
 
