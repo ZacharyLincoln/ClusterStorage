@@ -68,12 +68,14 @@ class File:
 
     # Returns an uploaded file
     def upload(self, parts):
+        #self.num_of_parts * (self.redundancy + 1)
+        params = {'amount': 1}
 
-        params = {'amount': self.num_of_parts * (self.redundancy + 1)}
-
-        master_node_ip = "http://10.0.0.68:5000"
+        master_node_ip = "http://10.0.0.9:8080"
         response = requests.get(url=master_node_ip + "/getnodes", params=params)
-        print(response)
+        print("MASTERNODE start")
+        print(response.text)
+        print("MASTERNODE end")
 
         hosts = [Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]
 
