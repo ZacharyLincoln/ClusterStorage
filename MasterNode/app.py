@@ -25,7 +25,11 @@ def getNodes():
 
         # Check to see if nodes are still online
         for node in available_nodes:
-            response = requests.get(url=node + "/online")
+            try:
+                response = requests.get(url=node + "/online")
+            except requests.exceptions.ConnectionError:
+                available_nodes.remove(node)
+
             if response.text == "200":
                 # Node is online keep in array
                 pass

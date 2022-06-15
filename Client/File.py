@@ -68,8 +68,8 @@ class File:
 
     # Returns an uploaded file
     def upload(self, parts):
-        #self.num_of_parts * (self.redundancy + 1)
-        params = {'amount': 3}
+
+        params = {'amount': self.num_of_parts * (self.redundancy + 1)}
 
         master_node_ip = "http://10.0.0.9:8080"
         response = requests.get(url=master_node_ip + "/getnodes", params=params)
