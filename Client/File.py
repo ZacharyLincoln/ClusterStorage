@@ -69,21 +69,44 @@ class File:
     # Returns an uploaded file
     def upload(self, parts):
         #self.num_of_parts * (self.redundancy + 1)
-        params = {'amount': 1}
+        params = {'amount': 3}
 
         master_node_ip = "http://10.0.0.9:8080"
         response = requests.get(url=master_node_ip + "/getnodes", params=params)
         print("MASTERNODE start")
         print(response.text)
+        host_ips = response.text.replace("[", "").replace("]", "").replace("\'", "").strip().split(",")
+
+        print(host_ips[0])
         print("MASTERNODE end")
 
-        hosts = [Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]
+        all_hosts = []
+
+        # Create Hosts
+        for ip in host_ips:
+            host = Host(ip)
+            all_hosts.append(host)
+
+        hosts = []
+        for i in range(self.num_of_parts):
+            hosts.append(all_hosts.pop())
+
+        #hosts = [Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]
 
         # An array of arrays of length of parts example
+        redundant_hosts_arry = []
+        for i in range(self.redundancy):
+            redundant_row = []
+            for i in range(self.num_of_parts):
+                redundant_row.append(all_hosts.pop())
+            redundant_hosts_arry.append(redundant_row)
+
+
+
         # [1, 2, 3], [1, 2, 3], [1, 2, 3]
         # Where the length of parts is 3
-        redundant_hosts_arry = [[Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]]
-        # TODO Get (num_of_parts * redundancy) online hosts
+        #redundant_hosts_arry = [[Host("http://10.0.0.10:8080"), Host("http://10.0.0.11:8080"), Host("http://10.0.0.12:8080"), Host("http://10.0.0.13:8080")]]
+
 
         ids = []
 
