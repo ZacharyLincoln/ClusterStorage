@@ -19,6 +19,7 @@ def setupNode():
         serialize()
         return "Setup Complete"
 
+
 @app.route('/getnodes', methods=['GET', 'POST'])
 def getNodes():
     if request.method == 'GET':
@@ -54,14 +55,14 @@ def serialize():
     output = {
         "nodes": available_nodes
     }
-    with open("./save.nodes", "w") as output_file:
+    with open("/serv/Cluster/MasterNode/save.nodes", "w") as output_file:
         json.dump(output, output_file)
 
 
 def load():
     global available_nodes
     try:
-        with open("./save.nodes", "r") as input_file:
+        with open("/serv/Cluster/MasterNode/save.nodes", "r") as input_file:
             input = input_file.readlines()
             json_in = json.loads(input.pop())
 

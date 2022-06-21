@@ -341,12 +341,13 @@ def test_upload():
 
     uploaded_file.serialize("./Uploads/")
 
+
 def test_download():
     uploaded_file = UploadedFile.load("./Uploads/qwerty.uploaded")
 
     downloaded_file = uploaded_file.download()
     downloaded_file.get_file("./Uploads/")
 
-if __name__ == "__main__":
 
-    test_download()
+if __name__ == "__main__":
+    test_upload()
