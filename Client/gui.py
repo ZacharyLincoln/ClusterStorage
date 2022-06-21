@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, CENTER, DISABLED, NORMAL, RAISED
+from tkinter import ttk, CENTER, DISABLED, NORMAL, RAISED, END
 from tkinter.messagebox import showinfo
 from tkinter import filedialog as fd
 from File import *
@@ -7,7 +7,7 @@ import glob
 import asyncio
 
 
-height = 125
+height = 150
 width = 1100
 
 root = tk.Tk()
@@ -36,6 +36,9 @@ uploaded_file_tree.heading("# 4", text="Online | Offline nodes")
 
 
 def update_uploaded_files():
+    for item in uploaded_file_tree.get_children():
+        uploaded_file_tree.delete(item)
+
     print("test")
     for file in glob.glob(".\\Uploads\\*.uploaded"):
         file_name = file
@@ -65,7 +68,7 @@ def update_uploaded_files():
             print(len(nodes))
 
             uploaded_file_tree.insert('', 'end', text="5",
-                                  values=(file, len(json_in['part_ids']), len(json_in['redundant_hosts']), str(online) + " / " + str(offline) + "  " + str(online/len(nodes)*100) + "%"))
+                                  values=(file, len(json_in['part_ids']), len(json_in['redundant_hosts']), str(online) + " / " + str(offline) + "  " + str(round(online/len(nodes)*100)) + "%"))
 
 update_uploaded_files()
 
@@ -103,6 +106,7 @@ def upload_input_clicked(element):
     filename = fd.askopenfilename()
     print(filename)
     element.config(state=NORMAL)
+    element.delete(0, END)
     element.insert(0, str(filename))
     element.config(state=DISABLED)
 
@@ -154,8 +158,6 @@ masternode_ip_entry = tk.Entry(root, textvariable=masternode_ip, font=('calibre'
 
 
 masternode_ip_entry.grid(row=1, column=1, columnspan=2)
-
-masternode_ip.set("10.0.0.9:8080")
 
 label = tk.Label(root, text="Master Node Ip and Port")
 label.grid(row=0,column=1, columnspan=2, sticky="")

@@ -15,7 +15,10 @@ def setupNode():
         ip = "http://"+flask.request.remote_addr+":8080"
 
         print(ip)
-        available_nodes.append(ip)
+
+        if ip not in available_nodes:
+            available_nodes.append(ip)
+
         serialize()
         return "Setup Complete"
 
@@ -42,7 +45,11 @@ def getNodes():
         if len(available_nodes) < amount:
             return "400"
 
-        indexs = random.sample(range(len(available_nodes)), amount)
+        indexs = []
+        while not len(indexs) == len(set(indexs)) and not len(indexs) == 0:
+            indexs = random.sample(range(len(available_nodes)), amount)
+
+
 
         selected_nodes = []
         for index in indexs:
