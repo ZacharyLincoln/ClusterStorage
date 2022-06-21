@@ -46,7 +46,7 @@ def getNodes():
             return "400"
 
         indexs = []
-        while not len(indexs) == len(set(indexs)) and not len(indexs) == 0:
+        while not len(indexs) == len(set(indexs)) or len(indexs) == 0:
             indexs = random.sample(range(len(available_nodes)), amount)
 
 
