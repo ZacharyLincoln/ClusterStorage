@@ -26,7 +26,7 @@ class File:
         if exists(self.file_path):
             bytes = []
 
-            # Read in file and get all of the bytes
+            # Read in file and get all the bytes
             with open(self.file_path, "rb") as file:
                 byte = file.read(1)
                 while byte:
@@ -161,16 +161,37 @@ class UploadedFile:
     # Returns a DownloadedFile object
     def download(self):
         downloaded_parts = []
-        for part_id, host in zip(self.part_ids, self.hosts):
+        for part_index, (part_id, host) in enumerate(zip(self.part_ids, self.hosts)):
             # TODO check if host is online if the host is offline than get the redundant host and download from there
-            downloaded_parts.append(host.download_part(part_id))
+            part = host.download_part(part_id)
+            if not part == False:
+                downloaded_parts.append(part)
+            else:
+                print("Node offline trying redundant hosts")
+                downloaded_part = False
+                # Node Offline get from redundant node
+                for row in self.redundant_hosts:
+                    # Try to get from redundant host
+                    redundant_host = row[part_index]
+                    part = redundant_host.download_part(part_id)
+                    if not part == False:
+                        downloaded_parts.append(part)
+                        downloaded_part = True
+                        break
+                    else:
+                        continue
+
+                if downloaded_part:
+                    # Yay
+                    pass
+                else:
+                    # :(
+                    # Can not complete download
+                    return None
 
         downloaded_file = DownloadedFile(downloaded_parts, self.keys, len(self.part_ids), self.file_name)
 
         return downloaded_file
-
-    def redundant_download(self):
-        pass
 
     def serialize(self, location=""):
 
@@ -197,7 +218,8 @@ class UploadedFile:
 
         path = location + str(self.file_name) + ".uploaded"
         if not location == "" and str(self.file_name).__contains__("/"):
-            path = location + str(self.file_name).split("/")[1] + ".uploaded"
+            split_file_name = str(self.file_name).split("/")
+            path = location + split_file_name[len(split_file_name)-1] + ".uploaded"
 
         with open(path, "w") as output_file:
             json.dump(output, output_file)
@@ -270,7 +292,7 @@ class DownloadedFile:
         self._decrypt_parts()
         new_bytes = self._combine_parts()
         print(self.file_name)
-        self._convert_from_binary(new_bytes, path)
+        self._convert_from_binary(new_bytes, self.file_name)
 
 
 # This represents a host that is storing a part of a file
@@ -290,16 +312,22 @@ class Host:
             return False
 
     def download_part(self, part_id):
-        params = {'id': part_id}
-        response = requests.get(url=self.ip + "/download", params=params)
-        data = json.loads(response.text)['data']
+        try:
+            params = {'id': part_id}
+            response = requests.get(url=self.ip + "/download", params=params)
+            print(response.text)
+            data = json.loads(response.text)['data']
 
-        bytes = []
-        for char in data:
-            bytes.append(str.encode(char))
+            bytes = []
+            for char in data:
+                bytes.append(str.encode(char))
 
-        part = Part(bytes, part_id)
-        return part
+            part = Part(bytes, part_id)
+            return part
+        except requests.exceptions.ConnectTimeout:
+            return False
+        except json.decoder.JSONDecodeError:
+            return False
 
 
 def test_upload():

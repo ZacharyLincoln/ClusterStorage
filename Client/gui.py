@@ -3,6 +3,9 @@ from tkinter import ttk, CENTER, DISABLED, NORMAL, RAISED
 from tkinter.messagebox import showinfo
 from tkinter import filedialog as fd
 from File import *
+import glob
+import asyncio
+
 
 height = 125
 width = 1100
@@ -29,9 +32,42 @@ uploaded_file_tree.column("# 4", anchor=CENTER)
 uploaded_file_tree.heading("# 4", text="Online | Offline nodes")
 
 # TODO load in uploaded files
+#print(glob.glob(".\\Uploads\\*"))
 
 
-uploaded_file_tree.insert('', 'end', text="5", values=("C:\\Users\\Zach\\Desktop\\Center.stl", 'Stephan', 'Heyward', "5"))
+def update_uploaded_files():
+    print("test")
+    for file in glob.glob(".\\Uploads\\*.uploaded"):
+        file_name = file
+        with open(file_name, "r") as input_file:
+            input = input_file.readlines()
+            json_in = json.loads(input.pop())
+
+            nodes = []
+            for ip_row in json_in['redundant_hosts']:
+                for ip in ip_row:
+                    nodes.append(ip)
+
+            for ip in json_in['hosts']:
+                nodes.append(ip)
+            offline = 0
+            online = 0
+            print("test")
+            for node in nodes:
+                try:
+                    response = requests.get(url=node + "/online", timeout=.5)
+                    print("online")
+                    online += 1
+                except requests.exceptions.ConnectionError:
+                    print("offline")
+                    offline += 1
+
+            print(len(nodes))
+
+            uploaded_file_tree.insert('', 'end', text="5",
+                                  values=(file, len(json_in['part_ids']), len(json_in['redundant_hosts']), str(online) + " / " + str(offline) + "  " + str(online/len(nodes)*100) + "%"))
+
+update_uploaded_files()
 
 
 def select_item(a):
@@ -47,11 +83,13 @@ def upload_file(file_path, masternode_ip):
     print(file_path)
 
     keys = []
+    print(file_path)
 
     file = File(file_path, keys, 2, 2)
     uploaded_file = file.upload(masternode_ip)
 
     uploaded_file.serialize("./Uploads/")
+    update_uploaded_files()
 
 
 upload_btn = tk.Button(root, text="Upload", command=lambda: upload_file(upload_file_path.get(), masternode_ip.get()))
@@ -79,11 +117,18 @@ upload_file_path_entry.grid(row=2, column=1)
 # --------------------------------------------Download File Button------------------------------------------------------
 def download_file(item):
     path = item.get('values')[0]
+    print("Download", path)
 
     uploaded_file = UploadedFile.load(path)
 
     downloaded_file = uploaded_file.download()
+    if downloaded_file:
+        print("File Downloaded")
+    else:
+        print(":(")
+        return
     downloaded_file.get_file(path.replace(".uploaded", ""))
+
 
 
 download_file_btn = tk.Button(root, text="Download Selected",
@@ -110,8 +155,9 @@ masternode_ip_entry = tk.Entry(root, textvariable=masternode_ip, font=('calibre'
 
 masternode_ip_entry.grid(row=1, column=1, columnspan=2)
 
+masternode_ip.set("10.0.0.9:8080")
 
-label = tk.Label(root, text="Master Node Ip", )
+label = tk.Label(root, text="Master Node Ip and Port")
 label.grid(row=0,column=1, columnspan=2, sticky="")
 
 root.mainloop()
