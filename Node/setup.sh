@@ -1,5 +1,4 @@
 sudo apt install python3-flask -y
-sudo rm -rf /serv/Cluster
 sudo git clone https://github.com/ZacharyLincoln/TempCluster /serv/Cluster/
 
 crontab -l > tempcron
