@@ -1,13 +1,13 @@
 import random
-
 import flask
 import requests
 from flask import Flask, request
 import json
 
+available_nodes = []
+
 app = Flask(__name__)
 
-available_nodes = []
 
 @app.route('/setup', methods=['GET', 'POST'])
 def setupNode():
@@ -16,6 +16,7 @@ def setupNode():
 
         print(ip)
         available_nodes.append(ip)
+        serialize()
         return "Setup Complete"
 
 @app.route('/getnodes', methods=['GET', 'POST'])
@@ -49,4 +50,27 @@ def getNodes():
         return str(selected_nodes)
 
 
+def serialize():
+    output = {
+        "nodes": available_nodes
+    }
+    with open("./save.nodes", "w") as output_file:
+        json.dump(output, output_file)
 
+
+def load():
+    global available_nodes
+    try:
+        with open("./save.nodes", "r") as input_file:
+            input = input_file.readlines()
+            json_in = json.loads(input.pop())
+
+
+            available_nodes = json_in["nodes"]
+    except FileNotFoundError:
+        available_nodes = []
+
+    print(available_nodes)
+
+
+load()

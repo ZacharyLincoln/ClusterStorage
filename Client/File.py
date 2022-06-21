@@ -2,6 +2,7 @@ from os.path import exists
 from numpy import array_split, array
 import requests
 import json
+from time import sleep
 
 
 class File:
@@ -58,7 +59,6 @@ class File:
 
     # Generates id fby hashing the data in a part
     def _generate_id(self, arr):
-        print(hash(arr))
         return hash(arr)
 
     # Encrypt each part
@@ -67,18 +67,23 @@ class File:
         return parts
 
     # Returns an uploaded file
-    def upload(self, parts):
+    def upload(self, master_node_ip="10.0.0.9:8080"):
+
+        bytes = self._convert_to_binary()
+        parts = self._spit_into_parts(bytes, self.num_of_parts)
+        encrypted_parts = self._encrypt_parts(parts, self.keys)
+
 
         params = {'amount': self.num_of_parts * (self.redundancy + 1)}
 
-        master_node_ip = "http://10.0.0.9:8080"
+        master_node_ip = "http://" + master_node_ip
         response = requests.get(url=master_node_ip + "/getnodes", params=params)
-        print("MASTERNODE start")
-        print(response.text)
+
         host_ips = response.text.replace("[", "").replace("]", "").replace("\'", "").strip().split(",")
 
-        print(host_ips[0])
-        print("MASTERNODE end")
+        print("Nodes Received: ", end="")
+        print(host_ips)
+
 
         all_hosts = []
 
@@ -111,12 +116,12 @@ class File:
         ids = []
 
         # Upload a part to each host
-        for part, host in zip(parts, hosts):
+        for part, host in zip(encrypted_parts, hosts):
             host.upload_part(part)
             ids.append(part.id)
 
         for redundant_hosts in redundant_hosts_arry:
-            for part, host in zip(parts, redundant_hosts):
+            for part, host in zip(encrypted_parts, redundant_hosts):
                 host.upload_part(part)
         uploaded_file = UploadedFile(self.file_path, ids, self.keys, hosts, redundant_hosts_arry)
 
@@ -157,11 +162,15 @@ class UploadedFile:
     def download(self):
         downloaded_parts = []
         for part_id, host in zip(self.part_ids, self.hosts):
+            # TODO check if host is online if the host is offline than get the redundant host and download from there
             downloaded_parts.append(host.download_part(part_id))
 
-        downloaded_file = DownloadedFile(downloaded_parts, self.keys, len(self.part_ids))
+        downloaded_file = DownloadedFile(downloaded_parts, self.keys, len(self.part_ids), self.file_name)
 
         return downloaded_file
+
+    def redundant_download(self):
+        pass
 
     def serialize(self, location=""):
 
@@ -185,12 +194,10 @@ class UploadedFile:
             "part_ids": self.part_ids,
             "keys": self.keys
         }
-        print(location + str(self.file_name) + ".uploaded")
 
         path = location + str(self.file_name) + ".uploaded"
         if not location == "" and str(self.file_name).__contains__("/"):
             path = location + str(self.file_name).split("/")[1] + ".uploaded"
-            print(path)
 
         with open(path, "w") as output_file:
             json.dump(output, output_file)
@@ -201,7 +208,6 @@ class UploadedFile:
         with open(file_name, "r") as input_file:
             input = input_file.readlines()
             json_in = json.loads(input.pop())
-            # TODO fix hosts and redundant hosts bc its just ips not host objs
 
             hosts = []
             for ip in json_in['hosts']:
@@ -224,16 +230,18 @@ class DownloadedFile:
     parts = []
     keys = []
     num_of_parts = 0
+    file_name = ""
 
-    def __init__(self, parts, keys, num_of_parts):
+    def __init__(self, parts, keys, num_of_parts, file_name):
         self.parts = parts
         self.keys = keys
         self.num_of_parts = num_of_parts
+        self.file_name = file_name
         pass
 
     def _decrypt_parts(self):
         # TODO decrypt parts
-        return self.parts
+        pass
 
     def _combine_parts(self):
 
@@ -252,8 +260,17 @@ class DownloadedFile:
 
         return
 
-    def get_file(self):
-        pass
+    def get_file(self, path):
+
+        if not path == "" and str(self.file_name).__contains__("/"):
+            path = path + str(self.file_name).split("/")[1]
+        else:
+            path = self.file_name
+
+        self._decrypt_parts()
+        new_bytes = self._combine_parts()
+        print(self.file_name)
+        self._convert_from_binary(new_bytes, path)
 
 
 # This represents a host that is storing a part of a file
@@ -265,10 +282,8 @@ class Host:
         pass
 
     def upload_part(self, part):
-        print(part.data)
         params = {'id': part.id, 'data': part.data}
         response = requests.get(url=self.ip+"/upload", params=params)
-        print(response)
         if response:
             return True
         else:
@@ -282,47 +297,28 @@ class Host:
         bytes = []
         for char in data:
             bytes.append(str.encode(char))
-        print(bytes)
 
         part = Part(bytes, part_id)
         return part
 
 
+def test_upload():
+    keys = []
+
+    file = File("../Surfaces LIVE _ Presented by Grubhub Sound Bites-oH1dTVrFi_Q.webm", keys, 4, 2)
+    file = File("../qwerty", keys, 4, 1)
+
+
+    uploaded_file = file.upload()
+
+    uploaded_file.serialize("./Uploads/")
+
+def test_download():
+    uploaded_file = UploadedFile.load("./Uploads/qwerty.uploaded")
+
+    downloaded_file = uploaded_file.download()
+    downloaded_file.get_file("./Uploads/")
 
 if __name__ == "__main__":
 
-    keys = []
-    file = File("../app.py", keys, 4, 0)
-    bytes = file._convert_to_binary()
-    print("Old", bytes)
-    parts = file._spit_into_parts(bytes, 4)
-    encrypted_parts = file._encrypt_parts(parts,keys)
-    
-    uploaded_file = file.upload(encrypted_parts)
-    
-    uploaded_file.serialize("./Uploads/")
-
-'''
-
-    uploaded_file = UploadedFile.load("./Uploads/app.py.uploaded")
-
-    downloaded_file = uploaded_file.download()
-
-#    downloaded_file = DownloadedFile()
-    new_decrypted_parts = downloaded_file._decrypt_parts()
-    new_bytes = downloaded_file._combine_parts()
-    print("New",new_bytes)
-    downloaded_file._convert_from_binary(new_bytes, "../test.py")
-
-    #host = Host("http://127.0.0.1:5000")
-    #host.upload_part(parts[0])
-    #part = host.download_part(parts[0].id)
-    #print(part.id)
-
-'''
-
-
-
-
-
-
+    test_download()
