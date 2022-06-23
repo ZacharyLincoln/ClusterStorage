@@ -11,8 +11,8 @@
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
-  <a href="#how-to-use">How To Set Up Client</a> •
-  <a href="#download">How To Set Up Nodes</a> •
+  <a href="#how-to-set-up-client">How To Set Up Client</a> •
+  <a href="#how-to-set-up-nodes">How To Set Up Nodes</a> •
   <a href="#license">License</a>
 </p>
 
