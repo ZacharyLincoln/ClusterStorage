@@ -2,11 +2,9 @@ import os
 import threading
 import tkinter as tk
 from tkinter import ttk, CENTER, DISABLED, NORMAL, RAISED, END
-from tkinter.messagebox import showinfo
 from tkinter import filedialog as fd
 from File import *
 import glob
-import asyncio
 
 
 height = 150
