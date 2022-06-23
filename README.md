@@ -33,7 +33,7 @@ To clone and setup this application, you'll need [Git](https://git-scm.com) and 
 
 ```bash
 # Clone this repository
-$ sudo git clone https://github.com/ZacharyLincoln/ClusterStorage /serv/Cluster
+$ sudo git clone https://github.com/ZacharyLincoln/ClusterStorage
 
 # Install the requirements with pip
 $ pip install -r requirements.txt 
