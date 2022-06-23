@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <a href="http://www.amitmerchant.com/electron-markdownify"><img src="./readme_assets/logo-removebg-preview.png" alt="Markdownify" width="200"></a>
+  <img src="./readme_assets/logo-removebg-preview.png" alt="Markdownify" width="200">
   <br>
   Cluster Storage
   <br>
