@@ -1,7 +1,7 @@
 
 <h1 align="center">
   <br>
-  <img src="readme_assets/logo.png" alt="Markdownify" width="200">
+  <img src="readme_assets/logo.png" alt="Cluster Storage Logo" width="200">
   <br>
   Cluster Storage
   <br>
