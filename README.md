@@ -7,7 +7,7 @@
   <br>
 </h1>
 
-<h4 align="center" id="desc">A storage solution to ensure redundancy and reliability for everyday applications.</h4>
+<h4 align="center", id="desc">A storage solution to ensure redundancy and reliability for everyday applications.</h4>
 
 <p align="center">
   <a href="#key-features">Key Features</a> •
